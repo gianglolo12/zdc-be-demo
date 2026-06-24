@@ -1,6 +1,9 @@
 # Test profile: H2 in-memory, no MySQL/Redis/Flyway needed so `mvn test`
 # runs in CI / the headless worker without external services.
 spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
