@@ -1,4 +1,7 @@
 import express from "express"
+import { cardsRouter } from "./routes/cards.js"
+import * as cardService from "./services/cardService.js"
+
 const app = express()
 app.use(express.json())
 
@@ -23,5 +26,33 @@ app.get("/orders/:id", (req, res) => {
   res.json(order)
 })
 
+// G4.F11 — card lookup / inventory / reveal gate routes.
+app.use("/cards", cardsRouter)
+
+// Seed a little demo data so the card endpoints are usable when running standalone.
+function seedDemoCards() {
+  cardService.setSalesPin("agent-1", "123456")
+  cardService.createCard({
+    agentId: "agent-1", serial: "ZC50K0001", pin: "1111-2222-3333", denomination: 50000,
+    orderId: 1, purchaseDate: "2026-06-01", expiryDate: "2027-06-01",
+    state: cardService.CARD_STATE.DELIVERED_UNREVEALED,
+  })
+  cardService.createCard({
+    agentId: "agent-1", serial: "ZC100K0002", pin: "4444-5555-6666", denomination: 100000,
+    orderId: 1, purchaseDate: "2026-06-01", soldDate: "2026-06-10", expiryDate: "2027-06-01",
+    state: cardService.CARD_STATE.REVEALED_SOLD,
+  })
+  cardService.createCard({
+    agentId: "agent-1", serial: "ZC50K0003", pin: "7777-8888-9999", denomination: 50000,
+    orderId: 2, purchaseDate: "2026-06-05", expiryDate: "2027-06-05",
+    state: cardService.CARD_STATE.BLOCKED_FRAUD,
+  })
+}
+
 const port = process.env.PORT ?? 8080
-app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+if (process.env.NODE_ENV !== "test") {
+  seedDemoCards()
+  app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+}
+
+export { app, seedDemoCards }
