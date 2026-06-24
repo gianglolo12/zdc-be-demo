@@ -17,11 +17,21 @@ app.post("/orders", (req, res) => {
   res.status(201).json(order)
 })
 
+// List all orders. Returns 200 with a JSON array (empty array when no orders).
+app.get("/orders", (_req, res) => {
+  res.status(200).json(orders)
+})
+
 app.get("/orders/:id", (req, res) => {
   const order = orders.find((o) => o.id === Number(req.params.id))
   if (!order) return res.status(404).json({ error: "not found" })
   res.json(order)
 })
 
-const port = process.env.PORT ?? 8080
-app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+export { app, orders }
+
+// Start the server only when run directly, not when imported by tests.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  const port = process.env.PORT ?? 8080
+  app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+}
