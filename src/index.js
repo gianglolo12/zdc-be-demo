@@ -17,11 +17,28 @@ app.post("/orders", (req, res) => {
   res.status(201).json(order)
 })
 
+// List orders for an agent (newest first): GET /orders?agentId=X
+app.get("/orders", (req, res) => {
+  const { agentId } = req.query
+  if (!agentId) {
+    return res.status(400).json({ error: "agentId query param required" })
+  }
+  const result = orders
+    .filter((o) => String(o.agentId) === String(agentId))
+    .sort((a, b) => b.id - a.id)
+  res.json(result)
+})
+
 app.get("/orders/:id", (req, res) => {
   const order = orders.find((o) => o.id === Number(req.params.id))
   if (!order) return res.status(404).json({ error: "not found" })
   res.json(order)
 })
 
-const port = process.env.PORT ?? 8080
-app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+export { app }
+
+// Only start the server when run directly, so tests can import `app`.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  const port = process.env.PORT ?? 8080
+  app.listen(port, () => console.log(`zdc-be-demo listening on :${port}`))
+}
